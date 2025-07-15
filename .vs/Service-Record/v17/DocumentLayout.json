@@ -1,0 +1,122 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\Freelancing project\\Service Record\\Service-Record\\Service-Record\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{2901BEC0-43EE-713B-BC55-2F1B9F5C4DE1}|Service-Record.csproj|d:\\freelancing project\\service record\\service-record\\service-record\\helper\\captcha.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2901BEC0-43EE-713B-BC55-2F1B9F5C4DE1}|Service-Record.csproj|solutionrelative:helper\\captcha.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2901BEC0-43EE-713B-BC55-2F1B9F5C4DE1}|Service-Record.csproj|d:\\freelancing project\\service record\\service-record\\service-record\\helper\\aesencrytdecry.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2901BEC0-43EE-713B-BC55-2F1B9F5C4DE1}|Service-Record.csproj|solutionrelative:helper\\aesencrytdecry.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2901BEC0-43EE-713B-BC55-2F1B9F5C4DE1}|Service-Record.csproj|d:\\freelancing project\\service record\\service-record\\service-record\\dal\\enums\\dbenum.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2901BEC0-43EE-713B-BC55-2F1B9F5C4DE1}|Service-Record.csproj|solutionrelative:dal\\enums\\dbenum.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2901BEC0-43EE-713B-BC55-2F1B9F5C4DE1}|Service-Record.csproj|d:\\freelancing project\\service record\\service-record\\service-record\\models\\dtos\\service_recorddtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2901BEC0-43EE-713B-BC55-2F1B9F5C4DE1}|Service-Record.csproj|solutionrelative:models\\dtos\\service_recorddtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2901BEC0-43EE-713B-BC55-2F1B9F5C4DE1}|Service-Record.csproj|d:\\freelancing project\\service record\\service-record\\service-record\\bal\\authentication\\jwtservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2901BEC0-43EE-713B-BC55-2F1B9F5C4DE1}|Service-Record.csproj|solutionrelative:bal\\authentication\\jwtservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2901BEC0-43EE-713B-BC55-2F1B9F5C4DE1}|Service-Record.csproj|d:\\freelancing project\\service record\\service-record\\service-record\\bal\\authentication\\ijwtservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2901BEC0-43EE-713B-BC55-2F1B9F5C4DE1}|Service-Record.csproj|solutionrelative:bal\\authentication\\ijwtservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "DbEnum.cs",
+              "DocumentMoniker": "D:\\Freelancing project\\Service Record\\Service-Record\\Service-Record\\DAL\\Enums\\DbEnum.cs",
+              "RelativeDocumentMoniker": "DAL\\Enums\\DbEnum.cs",
+              "ToolTip": "D:\\Freelancing project\\Service Record\\Service-Record\\Service-Record\\DAL\\Enums\\DbEnum.cs",
+              "RelativeToolTip": "DAL\\Enums\\DbEnum.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADAAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-14T18:03:49.59Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AESEncrytDecry.cs",
+              "DocumentMoniker": "D:\\Freelancing project\\Service Record\\Service-Record\\Service-Record\\Helper\\AESEncrytDecry.cs",
+              "RelativeDocumentMoniker": "Helper\\AESEncrytDecry.cs",
+              "ToolTip": "D:\\Freelancing project\\Service Record\\Service-Record\\Service-Record\\Helper\\AESEncrytDecry.cs",
+              "RelativeToolTip": "Helper\\AESEncrytDecry.cs",
+              "ViewState": "AgIAABIAAAAAAAAAAAAYwCYAAAA2AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-14T17:59:27.763Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Service_RecordDTOs.cs",
+              "DocumentMoniker": "D:\\Freelancing project\\Service Record\\Service-Record\\Service-Record\\Models\\DTOs\\Service_RecordDTOs.cs",
+              "RelativeDocumentMoniker": "Models\\DTOs\\Service_RecordDTOs.cs",
+              "ToolTip": "D:\\Freelancing project\\Service Record\\Service-Record\\Service-Record\\Models\\DTOs\\Service_RecordDTOs.cs",
+              "RelativeToolTip": "Models\\DTOs\\Service_RecordDTOs.cs",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAYwBsAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-14T17:52:33.153Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Captcha.cs",
+              "DocumentMoniker": "D:\\Freelancing project\\Service Record\\Service-Record\\Service-Record\\Helper\\Captcha.cs",
+              "RelativeDocumentMoniker": "Helper\\Captcha.cs",
+              "ToolTip": "D:\\Freelancing project\\Service Record\\Service-Record\\Service-Record\\Helper\\Captcha.cs",
+              "RelativeToolTip": "Helper\\Captcha.cs",
+              "ViewState": "AgIAAB4AAAAAAAAAAAAYwCkAAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-14T17:51:19.397Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "IJwtService.cs",
+              "DocumentMoniker": "D:\\Freelancing project\\Service Record\\Service-Record\\Service-Record\\BAL\\Authentication\\IJwtService.cs",
+              "RelativeDocumentMoniker": "BAL\\Authentication\\IJwtService.cs",
+              "ToolTip": "D:\\Freelancing project\\Service Record\\Service-Record\\Service-Record\\BAL\\Authentication\\IJwtService.cs",
+              "RelativeToolTip": "BAL\\Authentication\\IJwtService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-14T17:49:36.73Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "JwtService.cs",
+              "DocumentMoniker": "D:\\Freelancing project\\Service Record\\Service-Record\\Service-Record\\BAL\\Authentication\\JwtService.cs",
+              "RelativeDocumentMoniker": "BAL\\Authentication\\JwtService.cs",
+              "ToolTip": "D:\\Freelancing project\\Service Record\\Service-Record\\Service-Record\\BAL\\Authentication\\JwtService.cs",
+              "RelativeToolTip": "BAL\\Authentication\\JwtService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-14T17:48:51.842Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
