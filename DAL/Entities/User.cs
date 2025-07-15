@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using Service_Record.DAL.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
 
 namespace Service_Record.DAL.Entities;
 
@@ -39,6 +40,9 @@ public partial class User
 
     [Column("is_active")]
     public bool? IsActive { get; set; }
+
+    [Column("role")]
+    public UserRole Role { get; set; }
 
     [Column("created_at")]
     public DateTime? CreatedAt { get; set; }

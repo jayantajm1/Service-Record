@@ -1,7 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
+
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Service_Record.Models.Claims;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace Service_Record.Filters
 {
@@ -21,8 +24,7 @@ namespace Service_Record.Filters
             if (!context.HttpContext.Items.TryGetValue("userclaimmodel", out object? userClaims))
             {
                 context.Result = new JsonResult(new { message = "UnAuthenticated", apiResponseStatus = 3, result = false }) { StatusCode = StatusCodes.Status200OK };
-                Console.WriteLine("Unable to authorize for: " + context.HttpContext.Request.GetDisplayUrl());
-                Console.WriteLine("Using Authorization: " + context.HttpContext.Request.Headers.Authorization);
+             
                 return;
             }
 
@@ -49,13 +51,7 @@ namespace Service_Record.Filters
                     { StatusCode = StatusCodes.Status401Unauthorized };
                     return;
                 }
-                var app = JsonSerializer.Deserialize<ClaimModel.Application>(application[0].Value);
-                acs &= _roles.Contains(app.Role.Name);
-                if (!acs)
-                {
-                    context.Result = new JsonResult(new { message = "Unauthorized Acess", apiResponseStatus = 3, result = false }) { StatusCode = StatusCodes.Status200OK };
-                    return;
-                }
+               
             }
 
         }

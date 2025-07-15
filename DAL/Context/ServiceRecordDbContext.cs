@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Service_Record.DAL.Entities;
+using Service_Record.DAL.Enums;
 
 
 
@@ -35,7 +36,8 @@ public partial class ServiceRecordDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
 
-
+        modelBuilder.HasPostgresEnum<LogAction>();
+        modelBuilder.HasPostgresEnum<LogAction>();
         modelBuilder.Entity<Branch>(entity =>
         {
             entity.HasKey(e => e.BranchId).HasName("branches_pkey");
@@ -131,9 +133,13 @@ public partial class ServiceRecordDbContext : DbContext
 
             entity.Property(e => e.LogTime).HasDefaultValueSql("now()");
 
-            entity.HasOne(d => d.User).WithMany(p => p.UserLogs).HasConstraintName("user_logs_user_id_fkey");
-        });
+           
+            entity.Property(e => e.Action).HasColumnName("action");
 
+            entity.HasOne(d => d.User)
+                  .WithMany(p => p.UserLogs)
+                  .HasConstraintName("user_logs_user_id_fkey");
+        });
         OnModelCreatingPartial(modelBuilder);
     }
 

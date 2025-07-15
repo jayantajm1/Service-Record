@@ -1,7 +1,7 @@
-﻿
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using Service_Record.DAL.Enums; // Assuming log_action is defined here
 
 namespace Service_Record.DAL.Entities;
 
@@ -18,6 +18,9 @@ public partial class UserLog
 
     [Column("user_id")]
     public int UserId { get; set; }
+
+    [Column("action")]
+    public LogAction Action { get; set; } 
 
     [Column("log_time")]
     public DateTime? LogTime { get; set; }

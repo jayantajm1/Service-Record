@@ -1,241 +1,149 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.IdentityModel.Tokens;
+using Service_Record.BAL.Authentication;
+using Service_Record.DAL.Enums;
+using Service_Record.Helper;
+using Service_Record.Models.Claims;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using System.Text.Json;
 
 namespace Service_Record.Middlewares
 {
-
     public class AuthTokenMiddleware(
         RequestDelegate next,
         ILogger<AuthTokenMiddleware> logger,
-        IConfiguration Configuration,
-        ITokenHelper tokenHelper
-    )
+        IConfiguration configuration,
+        ITokenHelper tokenHelper)
     {
-        private readonly IConfiguration _Configuration = Configuration;
-        private readonly ILogger<AuthTokenMiddleware> _logger = logger;
         private readonly RequestDelegate _next = next;
+        private readonly ILogger<AuthTokenMiddleware> _logger = logger;
+        private readonly IConfiguration _config = configuration;
         private readonly ITokenHelper _tokenHelper = tokenHelper;
 
         public async Task Invoke(HttpContext context)
         {
             APIResponseClass<bool> response = new();
-            string tokenId = "--", token = "";
+            string token = context.Request.Headers.Authorization.FirstOrDefault()?.Split(" ").Last() ?? "";
+
             try
             {
-                token = context.Request.Headers.Authorization.FirstOrDefault()?.Split(" ").Last() ?? "";
+                //  Config values
+                var secretKey = _config["Auth:SecretKey"];
+                var issuer = _config["Jwt:Issuer"];
+                var audience = _config["Jwt:Audience"];
 
-                string aesKey = _Configuration?.GetSection("Auth:AesKey")?.Value ?? "";
-                string aesIV = _Configuration?.GetSection("Auth:AesIV")?.Value ?? "";
-                string secretKey = _Configuration?["Auth:SecretKey"] ?? "";
-                string jwtIssuer = _Configuration?["Jwt:Issuer"] ?? "";
-                string jwtAudience = _Configuration?["Jwt:Audience"] ?? "";
-
-                if (aesIV == "" || aesKey == "" || secretKey == "" || jwtIssuer == "" || jwtAudience == "")
+                if (string.IsNullOrEmpty(secretKey) || string.IsNullOrEmpty(issuer) || string.IsNullOrEmpty(audience))
                 {
-                    response.apiResponseStatus = Enum.APIResponseStatus.Error;
-                    response.message = "Missing " + aesIV == "" ? "Auth:AesIV " : ""
-                        + aesKey == "" ? "Auth:AesKey " : ""
-                        + secretKey == "" ? "Auth:SecretKey " : ""
-                        + jwtIssuer == "" ? "Jwt:Issuer " : ""
-                        + jwtAudience == "" ? "Jwt:Audience " : "".Replace(" ", ", ").Trim([',', ' '])
-                        + " in configuration, check appsettings. " + Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") + ".json";
+                    response.apiResponseStatus = APIResponseStatus.Error;
+                    response.message = "Missing Auth config (SecretKey, Issuer, Audience)";
                     response.result = false;
+                    await WriteUnauthorizedResponse(context, response);
                     return;
                 }
 
-                if (token != "")
+                // No token? Allow for [AllowAnonymous] endpoints
+                if (string.IsNullOrWhiteSpace(token))
                 {
-                    // token = AESEncrytDecry.DecryptStringAES(token, aesKey, aesIV);
-
-                    JwtSecurityTokenHandler? tokenHandler = new();
-                    if (!tokenHandler.CanReadToken(token))
-                    {
-                        response.message = "Malformed Token is being used check Authorization header of this request.";
-#if DEBUG
-                        response.message = "TokenId: " + tokenId + " is not readable.";
-#endif
-                        Console.WriteLine(response.message);
-                        Console.WriteLine("URL: " + context.Request.GetDisplayUrl());
-                        Console.WriteLine($"Malformed Token: {token}");
-                        response.apiResponseStatus = Enum.APIResponseStatus.Error;
-                        response.result = false;
-                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-
-                        context.Response.ContentType = "application/json; charset=utf-8";
-                        await context.Response.WriteAsync(JsonSerializer.Serialize(response));
-                        return;
-                    }
-
-                    JwtSecurityToken requestToken = tokenHandler.ReadJwtToken(token);
-                    tokenId = requestToken.Id;
-
-                    if (tokenId != "0")
-                    {
-                        ILoginLogRepository _loginLogRepository = context.RequestServices.GetRequiredService<ILoginLogRepository>();
-
-                        LoginLog? loginLog = await _loginLogRepository.GetSingleAysnc(e => e.Id == long.Parse(tokenId));
-
-                        string? requestTokenType = requestToken.Claims.Where(
-                            claims => claims.Type == "typ"
-                        ).Select(
-                            claim => claim.Value
-                        ).FirstOrDefault();
-
-                        if (loginLog == null)
-                        {
-                            Console.WriteLine($"Use of revoked Token: {tokenId} blocked.");
-                            response.message = "Unauthorized use of revoked tokenId: " + tokenId;
-                            response.apiResponseStatus = Enum.APIResponseStatus.Error;
-                            response.result = false;
-                            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-
-                            context.Response.ContentType = "application/json; charset=utf-8";
-                            await context.Response.WriteAsync(JsonSerializer.Serialize(response));
-                            return;
-                        }
-                        else if (loginLog.ApplicationId != 0 && requestTokenType == "acc")
-                        {
-                            IApplicationRepository _applicationRepository = context.RequestServices.GetRequiredService<IApplicationRepository>();
-                            secretKey = await _applicationRepository.GetSingleSelectedColumnByConditionAsync(
-                                e => e.Id == loginLog.ApplicationId,
-                                e => e.Key
-                            );
-                            Console.WriteLine($"Using App: {loginLog.ApplicationId} Token: {tokenId} SecretKey: {secretKey[..8]}...");
-                        }
-                    }
-
-                    TokenValidationParameters? validationParameters = new()
-                    {
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
-                        ValidateIssuer = true,
-                        ValidIssuer = jwtIssuer,
-                        ValidateAudience = true,
-                        ValidAudience = jwtAudience,
-                        ValidateLifetime = true, // Ensures the token has not expired
-#if DEBUG
-                        ClockSkew = TimeSpan.Zero
-#endif
-                    };
-
-                    System.Security.Claims.ClaimsPrincipal? principal = tokenHandler.ValidateToken(
-                        token,
-                        validationParameters,
-                        out SecurityToken validatedToken
-                    );
-
-                    bool isAuthenticated = false;
-
-                    if (principal.Identity != null)
-                    {
-                        isAuthenticated = principal.Identity.IsAuthenticated;
-                    }
-
-                    AuthClaimModel? jwtAuthClaimModel = new()
-                    {
-                        claims = [.. principal.Claims]
-                    };
-
-                    if (isAuthenticated && jwtAuthClaimModel != null)
-                    {
-                        string? expiration = principal.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Exp)?.Value ?? "0";
-
-                        if (expiration != "0")
-                        {
-                            long remainingTime = long.Parse(expiration) - DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-                            context.Response.Headers.Append(
-                                "Remaining-Time",
-                                remainingTime.ToString()
-                            );
-                            context.Response.Headers.Append(
-                                "Access-Control-Expose-Headers",
-                                "Remaining-Time"
-                            );
-                        }
-                        context.Items["userclaimmodel"] = jwtAuthClaimModel;
-                        context.Items["Token"] = token;
-                        if (tokenHandler.CanReadToken(token))
-                        {
-                            var validatedClaims = tokenHandler.ReadJwtToken(token).Claims;
-                            var userId = validatedClaims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.NameId)?.Value ?? "--";
-                            var appId = validatedClaims.FirstOrDefault(c => c.Type == "aid")?.Value ?? "--";
-                            Console.WriteLine($"Authorized TokenID: {validatedToken.Id} User: {userId} AppID: {appId}");
-                        }
-                        else
-                        {
-                            Console.WriteLine($"Unable to read Authorized TokenID: {validatedToken.Id}");
-                        }
-                        await _next(context);
-                    }
-                    else
-                    {
-                        response.message = "Invalid Token";
-                        response.apiResponseStatus = Enum.APIResponseStatus.Error;
-                        response.result = false;
-                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-
-                        context.Response.ContentType = "application/json; charset=utf-8";
-                        await context.Response.WriteAsync(JsonSerializer.Serialize(response));
-                        return;
-                    }
-
-                }
-                else
-                {
-                    //Not possible to authenticate without a toekn
                     await _next(context);
+                    return;
                 }
-            }
-            catch (SecurityTokenNotYetValidException ex)
-            {
-                response.message = "Token is not activated yet.";
-#if DEBUG
-                response.message = "TokenId: " + tokenId + " is not activated yet: " + ex.InnerException?.ToString() + ex.ToString();
-#endif
-                response.apiResponseStatus = Enum.APIResponseStatus.Error;
-                response.result = false;
-                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
 
-                context.Response.ContentType = "application/json; charset=utf-8";
-                await context.Response.WriteAsync(JsonSerializer.Serialize(response));
-            }
-            catch (SecurityTokenExpiredException ex)
-            {
-                response.message = "Token Expired.";
-#if DEBUG
-                response.message = "TokenId: " + tokenId + " expired: " + ex.InnerException?.ToString() + ex.ToString();
-#endif
-                response.apiResponseStatus = Enum.APIResponseStatus.Error;
-                response.result = false;
-                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                var tokenHandler = new JwtSecurityTokenHandler();
+                if (!tokenHandler.CanReadToken(token))
+                {
+                    response.apiResponseStatus = APIResponseStatus.Error;
+                    response.message = "Malformed or unreadable token.";
+                    response.result = false;
+                    await WriteUnauthorizedResponse(context, response);
+                    return;
+                }
 
-                context.Response.ContentType = "application/json; charset=utf-8";
-                await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+               
+                var validationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+                    ValidateIssuer = true,
+                    ValidIssuer = issuer,
+                    ValidateAudience = true,
+                    ValidAudience = audience,
+                    ValidateLifetime = true,
+
+                    ClockSkew = TimeSpan.Zero
+
+                };
+
+                var principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
+
+                if (principal.Identity?.IsAuthenticated != true)
+                {
+                    response.apiResponseStatus = APIResponseStatus.Error;
+                    response.message = "Token is not authenticated.";
+                    response.result = false;
+                    await WriteUnauthorizedResponse(context, response);
+                    return;
+                }
+
+                //  Save user claims for controllers
+                context.Items["userclaimmodel"] = new AuthClaimModel
+                {
+                    claims = principal.Claims.ToList()
+                };
+                context.Items["Token"] = token;
+
+                // Optional debug info
+                var userId = principal.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.NameId)?.Value ?? "--";
+                var role = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value ?? "--";
+
+                _logger.LogInformation($"✅ Token verified for UserId: {userId}, Role: {role}");
+
+                // ⏳ Remaining Time (optional)
+                var exp = principal.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Exp)?.Value;
+                if (long.TryParse(exp, out long expUnix))
+                {
+                    long remainingSeconds = expUnix - DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                    context.Response.Headers.Append("Remaining-Time", remainingSeconds.ToString());
+                    context.Response.Headers.Append("Access-Control-Expose-Headers", "Remaining-Time");
+                }
+
+                await _next(context); // Pass to next middleware
+            }
+            catch (SecurityTokenExpiredException)
+            {
+                response.apiResponseStatus = APIResponseStatus.Error;
+                response.message = "Token expired.";
+                response.result = false;
+                await WriteUnauthorizedResponse(context, response);
+            }
+            catch (SecurityTokenNotYetValidException)
+            {
+                response.apiResponseStatus = APIResponseStatus.Error;
+                response.message = "Token not yet active.";
+                response.result = false;
+                await WriteUnauthorizedResponse(context, response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                _logger.LogError(ex, "Unexpected error in AuthTokenMiddleware");
+                response.apiResponseStatus = APIResponseStatus.Error;
+                response.message = "Unexpected authentication error.";
 
-                Console.WriteLine("Token(Causing Exception): " + token);
-                Console.WriteLine("URL: " + context.Request.GetDisplayUrl());
-                Console.WriteLine("Exception: " + ex.ToString());
-                response.message = "Server Error: check server log for details.";
-#if DEBUG
-                response.message = "Server Error TokenId: " + tokenId
-                    + ex.InnerException?.ToString() + ex.ToString();
-#endif
-                response.apiResponseStatus = Enum.APIResponseStatus.Error;
+                response.message += $" DEBUG: {ex.Message}";
+
                 response.result = false;
-                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-
-                context.Response.ContentType = "application/json; charset=utf-8";
-                await context.Response.WriteAsync(JsonSerializer.Serialize(response));
-                return;
+                await WriteUnauthorizedResponse(context, response);
             }
         }
+
+        private static async Task WriteUnauthorizedResponse(HttpContext context, APIResponseClass<bool> response)
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            context.Response.ContentType = "application/json; charset=utf-8";
+            await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+        }
     }
+
     public static class AuthTokenMiddlewareExtensions
     {
         public static IApplicationBuilder UseAuthTokenMiddleware(this IApplicationBuilder builder)
@@ -243,5 +151,4 @@ namespace Service_Record.Middlewares
             return builder.UseMiddleware<AuthTokenMiddleware>();
         }
     }
-
 }

@@ -11,8 +11,8 @@ namespace Service_Record.DAL.Enums
 
     public enum LogAction
     {
-        Login,
-        Logout
+        LOGIN,
+        LOGOUT
     }
     public enum PartAction
     {
